@@ -1,21 +1,24 @@
 {
   "name": "sftp",
-  "displayName": "SFTP",
-  "description": "SFTP/FTP sync",
-  "version": "1.16.3",
-  "publisher": "Natizyskunk",
-  "author": "Natizyskunk <natan.fourie@hotmail.fr> (https://github.com/Natizyskunk)",
+  "displayName": "SFTP/FTP Sync (maintained)",
+  "description": "SFTP/FTP sync — maintained, up-to-date fork. Works on VS Code 1.123+/Node 24 (fixes the isDate crash).",
+  "version": "1.17.0",
+  "publisher": "fibanez",
+  "author": "fibanez (https://github.com/fibanez7)",
+  "contributors": [
+    "Natizyskunk <natan.fourie@hotmail.fr> (https://github.com/Natizyskunk)",
+    "liximomo (https://github.com/liximomo)"
+  ],
   "engines": {
     "vscode": "^1.64.2"
   },
   "bugs": {
-    "url": "https://github.com/Natizyskunk/vscode-sftp/issues",
-    "email": "natan.fourie@hotmail.fr"
+    "url": "https://github.com/fibanez7/vscode-sftp/issues"
   },
-  "homepage": "https://github.com/Natizyskunk/vscode-sftp/blob/master/README.md",
+  "homepage": "https://github.com/fibanez7/vscode-sftp#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Natizyskunk/vscode-sftp.git"
+    "url": "https://github.com/fibanez7/vscode-sftp.git"
   },
   "license": "MIT",
   "categories": [
@@ -737,7 +740,7 @@
     "lru-cache": "^4.1.3",
     "p-queue": "2.4.2",
     "ssh-config": "^1.1.3",
-    "ssh2": "^1.13.0",
+    "ssh2": "^1.17.0",
     "tmp": "^0.2.1",
     "upath": "^2.0.1"
   },

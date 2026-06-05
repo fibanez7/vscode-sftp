@@ -1,3 +1,10 @@
+## 1.17.0 - 2026-06-05
+_Inicio del fork mantenido por [@fibanez7](https://github.com/fibanez7). Continúa el trabajo de [@Natizyskunk](https://github.com/Natizyskunk) (a su vez fork de [@liximomo](https://github.com/liximomo))._
+* **Fix crash en VSCode 1.123+/Node 24** (`TypeError: isDate is not a function`): subido `ssh2` a `^1.17.0` (usa `util.types.isDate`, válido en Node 24). Desbloquea upload/download.
+* **Fix crash al conectar** (`The "listener" argument must be of type function`): los handlers de desconexión se registraban invocando `this.end()` en vez de pasar `() => this.end()`.
+* **Fix recompilación**: arreglados imports faltantes (`COMMAND_UPLOAD_*_TO_ALL_PROFILES`) y `getFileSystemPath` que recibía strings pero asumía `URI`.
+* Empaquetado más ligero y autocontenido: `ssh2` ahora va dentro del bundle webpack (22 files, ~246KB; antes 631 files/1.24MB arrastrando `node_modules`).
+
 ## 1.16.3 - 2023-06-16
 * [#356] New Feature : Upload to all profiles (Pull request [#313](https://github.com/Natizyskunk/vscode-sftp/pull/313) from @wewawa vscode-sftp:create_multi_command).
 * [#357] Fix : Correcting Typo 'avaliable' => 'available' (Pull request [#343](https://github.com/Natizyskunk/vscode-sftp/pull/343) from @kjo-sdds vscode-sftp:develop).

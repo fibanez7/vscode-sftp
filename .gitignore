@@ -7,6 +7,9 @@ _debug
 TODO.md
 INSTALL_DEBUG.md
 
+### Local working notes (internal — never publish) ###
+.claude/
+
 ### Extensions ###
 sftp-*.vsix
 
