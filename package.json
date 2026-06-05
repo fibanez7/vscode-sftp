@@ -1,5 +1,5 @@
 {
-  "name": "sftp",
+  "name": "sftp-sync-maintained",
   "displayName": "SFTP/FTP Sync (maintained)",
   "description": "SFTP/FTP sync — maintained, up-to-date fork. Works on VS Code 1.123+/Node 24 (fixes the isDate crash).",
   "version": "1.17.0",
