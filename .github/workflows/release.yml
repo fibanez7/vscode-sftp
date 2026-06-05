@@ -1,0 +1,47 @@
+name: Build & Release VSIX
+
+# Runs when you push a tag like v1.17.0
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # needed to create the GitHub Release and upload the .vsix
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Package VSIX
+        run: npx --yes @vscode/vsce package
+
+      - name: Attach .vsix to the GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: '*.vsix'
+          generate_release_notes: true
+
+  # Optional: auto-publish to the VS Code Marketplace on each tag.
+  # Enable by adding a repo secret VSCE_PAT (Azure DevOps PAT, scope Marketplace > Manage),
+  # then uncomment the job below.
+  #
+  # publish:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #     - run: npm ci
+  #     - run: npx --yes @vscode/vsce publish -p ${{ secrets.VSCE_PAT }}
