@@ -1,24 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
   <defs>
-    <linearGradient id="file" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#14B8A6"/>
-      <stop offset="1" stop-color="#22C55E"/>
-    </linearGradient>
+    <!-- carve gaps in the file outline where arrows / plus pass -->
+    <mask id="cut">
+      <rect width="256" height="256" fill="white"/>
+      <g fill="none" stroke="black" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M58 160 L58 80"/>
+        <path d="M42 100 L58 80 L74 100"/>
+        <path d="M90 80 L90 160"/>
+        <path d="M74 140 L90 160 L106 140"/>
+        <path d="M214 196 L214 232"/>
+        <path d="M196 214 L232 214"/>
+      </g>
+    </mask>
   </defs>
-  <!-- file silhouette (transparent background) -->
-  <path d="M64 36 L150 36 L196 82 L196 208 Q196 220 184 220 L64 220 Q52 220 52 208 L52 48 Q52 36 64 36 Z" fill="url(#file)"/>
-  <path d="M150 36 L196 82 L150 82 Z" fill="#0F766E"/>
-  <!-- vertical sync arrows (white) inside file -->
-  <g fill="none" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M100 184 L100 112"/>
-    <path d="M82 130 L100 112 L118 130"/>
-    <path d="M148 112 L148 184"/>
-    <path d="M130 166 L148 184 L166 166"/>
+  <!-- file outline + text lines, with gaps carved out -->
+  <g fill="none" stroke="#1AA85A" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" mask="url(#cut)">
+    <path d="M78 30 L168 30 L208 70 L208 192 Q208 210 190 210 L78 210 Q60 210 60 192 L60 48 Q60 30 78 30 Z"/>
+    <path d="M168 30 L168 70 L208 70"/>
+    <path d="M108 112 L178 112"/>
+    <path d="M108 146 L178 146"/>
   </g>
-  <!-- plus badge (bottom-right) -->
-  <circle cx="196" cy="196" r="34" fill="#0F766E"/>
-  <g fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round">
-    <path d="M196 180 L196 212"/>
-    <path d="M180 196 L212 196"/>
+  <!-- arrows + plus on top -->
+  <g fill="none" stroke="#1AA85A" stroke-width="13" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58 160 L58 80"/>
+    <path d="M42 100 L58 80 L74 100"/>
+    <path d="M90 80 L90 160"/>
+    <path d="M74 140 L90 160 L106 140"/>
+    <path d="M214 196 L214 232"/>
+    <path d="M196 214 L232 214"/>
   </g>
 </svg>
