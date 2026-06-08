@@ -25,10 +25,17 @@ jobs:
       - name: Package VSIX
         run: npx --yes @vscode/vsce package
 
+      - name: Extract release notes from CHANGELOG
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v v="## $VERSION " 'index($0,v)==1{f=1;print;next} /^## /&&f{f=0} f' CHANGELOG.md > RELEASE_NOTES.md
+          echo "--- release notes ---"; cat RELEASE_NOTES.md
+
       - name: Attach .vsix to the GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: '*.vsix'
+          body_path: RELEASE_NOTES.md
           generate_release_notes: true
 
   # Optional: auto-publish to the VS Code Marketplace on each tag.
