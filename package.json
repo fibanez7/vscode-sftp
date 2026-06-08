@@ -1,8 +1,8 @@
 {
   "name": "sftp-sync-maintained",
-  "displayName": "SFTP/FTP Sync (maintained)",
-  "description": "SFTP/FTP sync — maintained, up-to-date fork. Works on VS Code 1.123+/Node 24 (fixes the isDate crash).",
-  "version": "1.17.0",
+  "displayName": "SFTP Sync Plus",
+  "description": "Maintained, up-to-date fork for SFTP/FTP sync. Works on VS Code 1.123+/Node 24 (fixes the isDate crash). Independent fork — not the original 'SFTP' extension.",
+  "version": "1.18.0",
   "publisher": "fibanez",
   "author": "fibanez (https://github.com/fibanez7)",
   "contributors": [
@@ -704,7 +704,7 @@
     "dev": "webpack --mode development --watch",
     "test": "jest",
     "package": "vsce package",
-    "pub:debug": "rm -rf _debug && mkdir _debug && vsce package --out _debug/sftp-debug.vsix && cd _debug && git init && git commit --allow-empty -m 'update debug package' && git checkout -b debug-pacakge && cp ../INSTALL_DEBUG.md README.md  && git add . && git commit -am 'update debug package' && git push git@github.com:Natizyskunk/vscode-sftp.git debug-pacakge --force"
+    "pub:debug": "rm -rf _debug && mkdir _debug && vsce package --out _debug/sftp-debug.vsix && cd _debug && git init && git commit --allow-empty -m 'update debug package' && git checkout -b debug-pacakge && cp ../INSTALL_DEBUG.md README.md  && git add . && git commit -am 'update debug package' && git push git@github.com:fibanez7/vscode-sftp.git debug-pacakge --force"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",

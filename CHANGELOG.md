@@ -1,3 +1,11 @@
+## 1.18.0 - 2026-06-08
+_Rebrand para diferenciación en Marketplace (cumplir Terms of Use): nombre, icono y branding propios. **Sin cambios funcionales** — tu `.vscode/sftp.json` sigue igual._
+* **Nuevo nombre**: `SFTP/FTP Sync (maintained)` → **`SFTP Sync Plus`**.
+* **Nuevo icono** propio (badge verde con flechas ⇅), distinto del icono de la extensión original.
+* README: nueva sección "How is this different" + aviso claro de que **no es la extensión original**.
+* Imagen del Remote Explorer ahora servida desde el repo propio (antes hotlinkeaba al repo upstream).
+* Corregido `pub:debug`: apuntaba al repo de Natizyskunk → ahora `fibanez7/vscode-sftp`.
+
 ## 1.17.0 - 2026-06-05
 _Inicio del fork mantenido por [@fibanez7](https://github.com/fibanez7). Continúa el trabajo de [@Natizyskunk](https://github.com/Natizyskunk) (a su vez fork de [@liximomo](https://github.com/liximomo))._
 * **Fix crash en VSCode 1.123+/Node 24** (`TypeError: isDate is not a function`): subido `ssh2` a `^1.17.0` (usa `util.types.isDate`, válido en Node 24). Desbloquea upload/download.

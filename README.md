@@ -1,10 +1,28 @@
-# SFTP/FTP Sync (maintained)
+# SFTP Sync Plus
+
+> **This is an independent, community-maintained fork — _not_ the original "SFTP" extension by Natizyskunk / liximomo.** It has its own name, icon and repository. Use it if the original stopped working on recent VS Code.
 
 **A maintained, up-to-date fork of the popular VS Code SFTP extension — and it works on VS Code 1.123+ / Node 24, where the older versions crash.**
 
 Sync files between a local folder and a remote server over **SFTP/SSH** or **FTP/FTPS**: upload on save, download, two-way sync, a remote file explorer, multiple profiles and more.
 
 Maintained by [@fibanez7](https://github.com/fibanez7). Fork lineage: [liximomo](https://github.com/liximomo/vscode-sftp) → [Natizyskunk](https://github.com/Natizyskunk/vscode-sftp) → this fork. MIT licensed — thanks to both for the original work.
+
+---
+
+## How is this different from the original "SFTP" extension?
+
+This is a separate listing with its own name, icon, repository and maintainer. It exists to keep the tool alive on modern VS Code:
+
+| | Original `SFTP` (Natizyskunk / liximomo) | **SFTP Sync Plus** (this fork) |
+|---|---|---|
+| VS Code 1.123+ / Node 24 | ❌ crashes (`isDate is not a function`) | ✅ fixed |
+| Maintenance | stalled (last release behind) | actively maintained |
+| Icon & branding | blue file glyph | own green **⇅** icon |
+| Repository | `Natizyskunk/vscode-sftp` | `fibanez7/vscode-sftp` |
+| Your `sftp.json` | — | drop-in, **no config changes** |
+
+If the original still works for you, great — keep using it. This fork is for everyone it left stranded on a crash.
 
 ---
 
@@ -71,7 +89,7 @@ It's a **drop-in replacement** — your existing `.vscode/sftp.json` keeps worki
 
 1. Open **Extensions** (`Ctrl/Cmd + Shift + X`).
 2. **Uninstall** any other SFTP extension to avoid duplicate commands.
-3. Install **SFTP/FTP Sync (maintained)** from the Marketplace, or grab the `.vsix` from [Releases](https://github.com/fibanez7/vscode-sftp/releases) and use **··· → Install from VSIX…**.
+3. Install **SFTP Sync Plus** from the Marketplace, or grab the `.vsix` from [Releases](https://github.com/fibanez7/vscode-sftp/releases) and use **··· → Install from VSIX…**.
 4. Reload VS Code.
 
 ---
@@ -350,7 +368,7 @@ Set these in your User/Workspace **Settings** (not `sftp.json`):
 
 ## Remote Explorer
 
-![remote-explorer-preview](https://raw.githubusercontent.com/Natizyskunk/vscode-sftp/master/assets/showcase/remote-explorer.png)
+![remote-explorer-preview](https://raw.githubusercontent.com/fibanez7/vscode-sftp/develop/assets/showcase/remote-explorer.png)
 
 Browse the server from a dedicated sidebar:
 
