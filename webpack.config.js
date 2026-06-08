@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const webpack = require('webpack');
 
 /**@type {import('webpack').Configuration}*/
 const config = {
@@ -35,6 +36,13 @@ const config = {
       },
     ],
   },
+  plugins: [
+    // ssh2's native addons are optional (it falls back to pure JS). On Linux CI
+    // `npm ci` compiles them, producing .node binaries webpack can't bundle.
+    // Ignore them so the bundle uses the JS fallback on every platform.
+    new webpack.IgnorePlugin({ resourceRegExp: /^cpu-features$/ }),
+    new webpack.IgnorePlugin({ resourceRegExp: /\.node$/ }),
+  ],
 };
 
 module.exports = config;
