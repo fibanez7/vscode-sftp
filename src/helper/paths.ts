@@ -14,10 +14,17 @@ function getFileSystemPath(fsPath: string): string {
 		result = result[0].toUpperCase() + result.substr(1);
 	}
 	if (process.platform === 'win32' || process.platform === 'darwin') {
-		const realpath = fs.realpathSync.native(result);
-		// Only use the real path if only the casing has changed.
-		if (realpath.toLowerCase() === result.toLowerCase()) {
-			result = realpath;
+		try {
+			const realpath = fs.realpathSync.native(result);
+			// Only use the real path if only the casing has changed.
+			if (realpath.toLowerCase() === result.toLowerCase()) {
+				result = realpath;
+			}
+		} catch (error) {
+			// The path may no longer exist (e.g. a `removed` watcher event for a
+			// deleted file/dir, or a transient file like .git/index.lock). realpath
+			// is only used here to normalize drive-letter casing, so fall back to the
+			// original path instead of crashing the watcher handler.
 		}
 	}
 	return result;

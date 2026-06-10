@@ -1,3 +1,7 @@
+## 1.18.1 - 2026-06-10
+_Fix de crash del watcher al borrar archivos/carpetas. Sin cambios en tu `.vscode/sftp.json`._
+* **Fix crash en `watcher/removed`** (`Error: ENOENT ... realpath`): al borrar localmente un archivo o carpeta (o ficheros transitorios como `.git/index.lock`), `getFileSystemPath` hacía `fs.realpathSync` sobre una ruta que ya no existía y reventaba el handler del watcher. Ahora, si la ruta no existe, se usa la ruta original (el `realpath` solo normalizaba mayúsculas de la letra de unidad en Windows/macOS). No relacionado con `ssh2`.
+
 ## 1.18.0 - 2026-06-08
 _Rebrand para diferenciación en Marketplace (cumplir Terms of Use): nombre, icono y branding propios. **Sin cambios funcionales** — tu `.vscode/sftp.json` sigue igual._
 * **Nuevo nombre**: `SFTP/FTP Sync (maintained)` → **`SFTP Sync Plus`**.
