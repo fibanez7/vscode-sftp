@@ -4,6 +4,9 @@ _Maintenance release: bug fixes plus one small opt-in option. No changes needed 
 * **Fix `uploadOnSave` on network shares** (`\\server\share\...`) — `Config Not Found` when VS Code reported the server/share name with different letter case ([#8](https://github.com/fibanez7/vscode-sftp/issues/8), upstream Natizyskunk#589). UNC server and share names are now compared case-insensitively on Windows.
 * **New options `uploadIgnore` / `downloadIgnore`** ([#15](https://github.com/fibanez7/vscode-sftp/issues/15)): extra gitignore-style patterns applied only in one direction, on top of `ignore`. Example: `"downloadIgnore": ["node_modules"]` uploads it but never downloads it back.
 * **Quieter watcher deletes**: when a local file is deleted and it no longer exists on the remote (e.g. removed by "Sync Remote ➞ Local" with `syncOption.delete`), the remote delete is skipped and logged as info instead of a `No such file` error. Same for `downloadOnOpen` on a new local file that is not on the remote yet.
+* **Fix duplicated watcher actions**: the OS file watcher (notably on Windows) often reports the same change twice; the same upload/delete was then run twice. Repeats on an unchanged file within 3s are now skipped.
+* **Fix `Can't find config for remote resource` uncaught errors** after uploads/deletes when the Remote Explorer view was not loaded.
+* Skipped actions are logged with a `[skip]` tag.
 * Dependencies: `async` 3.2.6 (ReDoS fix), `ignore` 5.3.2.
 * The project is now in **maintenance mode**: critical fixes only.
 

@@ -78,7 +78,7 @@ async function downloadOnOpen(uri: vscode.Uri) {
     } catch (error) {
       // new local file not uploaded yet: nothing to download
       if (error.code === 2 || error.code === 'ENOENT') {
-        logger.info(`[file-open] not on remote, skip download: ${fspath}`);
+        logger.info(`[skip] download (not on remote) ${fspath}`);
         return;
       }
       logger.error(error, `download ${fspath}`);

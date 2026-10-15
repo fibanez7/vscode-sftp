@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as debounce from 'lodash.debounce';
 import logger from '../logger';
@@ -12,14 +13,47 @@ const watchers: {
   [x: string]: vscode.FileSystemWatcher;
 } = {};
 
-const uploadQueue = new Set<vscode.Uri>();
-const deleteQueue = new Set<vscode.Uri>();
+// keyed by fsPath: vscode.Uri instances for the same file are not equal
+const uploadQueue = new Map<string, vscode.Uri>();
+const deleteQueue = new Map<string, vscode.Uri>();
 
 // less than 550 will not work
 const ACTION_INTEVAL = 550;
 
+// The OS watcher (notably on Windows) often reports the same change twice,
+// ~1s apart, which escapes the debounce. Skip a repeat of the same action on
+// the same file within this window.
+const DUPLICATE_WINDOW = 3000;
+const recentUploads = new Map<string, { at: number; signature: string }>();
+const recentDeletes = new Map<string, number>();
+
+function fileSignature(fsPath: string): string {
+  try {
+    const stat = fs.statSync(fsPath);
+    return `${stat.mtimeMs}:${stat.size}`;
+  } catch {
+    return '';
+  }
+}
+
+function isDuplicateUpload(fsPath: string): boolean {
+  const signature = fileSignature(fsPath);
+  const last = recentUploads.get(fsPath);
+  const now = Date.now();
+  recentUploads.set(fsPath, { at: now, signature });
+  // only a duplicate if the file did not change since the last upload
+  return !!last && signature !== '' && last.signature === signature && now - last.at < DUPLICATE_WINDOW;
+}
+
+function isDuplicateDelete(fsPath: string): boolean {
+  const last = recentDeletes.get(fsPath);
+  const now = Date.now();
+  recentDeletes.set(fsPath, now);
+  return last !== undefined && now - last < DUPLICATE_WINDOW && !fs.existsSync(fsPath);
+}
+
 function doUpload() {
-  const files = Array.from(uploadQueue).sort((a, b) => fileDepth(b.fsPath) - fileDepth(a.fsPath));
+  const files = Array.from(uploadQueue.values()).sort((a, b) => fileDepth(b.fsPath) - fileDepth(a.fsPath));
   uploadQueue.clear();
 
   const currentDownloadTasks = getRunningTransformTasks().filter(
@@ -33,6 +67,9 @@ function doUpload() {
     }
 
     const fspath = uri.fsPath;
+    if (isDuplicateUpload(fspath)) {
+      return;
+    }
     logger.info(`[watcher/updated] ${fspath}`);
     try {
       await upload(uri);
@@ -44,10 +81,13 @@ function doUpload() {
 }
 
 function doDelete() {
-  const files = Array.from(deleteQueue).sort((a, b) => fileDepth(b.fsPath) - fileDepth(a.fsPath));
+  const files = Array.from(deleteQueue.values()).sort((a, b) => fileDepth(b.fsPath) - fileDepth(a.fsPath));
   deleteQueue.clear();
   files.forEach(async uri => {
     const fspath = uri.fsPath;
+    if (isDuplicateDelete(fspath)) {
+      return;
+    }
     logger.info(`[watcher/removed] ${fspath}`);
     try {
       await removeRemote(uri);
@@ -66,7 +106,7 @@ function uploadHandler(uri: vscode.Uri) {
     return;
   }
 
-  uploadQueue.add(uri);
+  uploadQueue.set(uri.fsPath, uri);
   debouncedUpload();
 }
 
@@ -117,7 +157,7 @@ function createWatcher(
         return;
       }
 
-      deleteQueue.add(uri);
+      deleteQueue.set(uri.fsPath, uri);
       debouncedDelete();
     });
   }

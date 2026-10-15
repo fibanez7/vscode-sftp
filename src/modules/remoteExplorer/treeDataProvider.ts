@@ -87,6 +87,11 @@ export default class RemoteTreeData
       return;
     }
 
+    // tree not loaded yet (or its roots were just reset): nothing on screen to refresh
+    if (!this.findRoot(item.resource.uri)) {
+      return;
+    }
+
     if (item.isDirectory) {
       this._onDidChangeFolder.fire(item);
 
