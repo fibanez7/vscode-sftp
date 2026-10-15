@@ -76,6 +76,11 @@ async function downloadOnOpen(uri: vscode.Uri) {
     try {
       await downloadFile(uri);
     } catch (error) {
+      // new local file not uploaded yet: nothing to download
+      if (error.code === 2 || error.code === 'ENOENT') {
+        logger.info(`[file-open] not on remote, skip download: ${fspath}`);
+        return;
+      }
       logger.error(error, `download ${fspath}`);
       app.sftpBarItem.updateStatus(StatusBarItem.Status.error);
     }

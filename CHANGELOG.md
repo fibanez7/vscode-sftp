@@ -3,7 +3,7 @@ _Maintenance release: bug fixes plus one small opt-in option. No changes needed 
 * **Fix Pageant (`"agent": "pageant"`) on Windows** — `Failed to retrieve identities from agent` ([#10](https://github.com/fibanez7/vscode-sftp/issues/10)). Since 1.17.0 `ssh2` is bundled, and its helper `pagent.exe` was left out of the package. It is now shipped with the extension.
 * **Fix `uploadOnSave` on network shares** (`\\server\share\...`) — `Config Not Found` when VS Code reported the server/share name with different letter case ([#8](https://github.com/fibanez7/vscode-sftp/issues/8), upstream Natizyskunk#589). UNC server and share names are now compared case-insensitively on Windows.
 * **New options `uploadIgnore` / `downloadIgnore`** ([#15](https://github.com/fibanez7/vscode-sftp/issues/15)): extra gitignore-style patterns applied only in one direction, on top of `ignore`. Example: `"downloadIgnore": ["node_modules"]` uploads it but never downloads it back.
-* **Quieter watcher deletes**: when a local file is deleted and it no longer exists on the remote (e.g. removed by "Sync Remote ➞ Local" with `syncOption.delete`), the remote delete is skipped and logged as info instead of a `No such file` error.
+* **Quieter watcher deletes**: when a local file is deleted and it no longer exists on the remote (e.g. removed by "Sync Remote ➞ Local" with `syncOption.delete`), the remote delete is skipped and logged as info instead of a `No such file` error. Same for `downloadOnOpen` on a new local file that is not on the remote yet.
 * Dependencies: `async` 3.2.6 (ReDoS fix), `ignore` 5.3.2.
 * The project is now in **maintenance mode**: critical fixes only.
 
