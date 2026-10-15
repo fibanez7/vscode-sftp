@@ -4,7 +4,7 @@ import * as debounce from 'lodash.debounce';
 import logger from '../logger';
 import { isValidFile, fileDepth } from '../helper';
 import { upload, removeRemote } from '../fileHandlers';
-import { WatcherService, TransferDirection } from '../core';
+import { WatcherService } from '../core';
 import app from '../app';
 import StatusBarItem from '../ui/statusBarItem';
 import { getRunningTransformTasks } from './serviceManager';
@@ -45,28 +45,29 @@ function isDuplicateUpload(fsPath: string): boolean {
   return !!last && signature !== '' && last.signature === signature && now - last.at < DUPLICATE_WINDOW;
 }
 
-// Files just written by a download (downloadOnOpen, sync remote ➞ local...).
-// The watcher sees that write as a local change; re-uploading it would only
-// echo the same content back, so skip while the file is still as downloaded.
-const downloaded = new Map<string, string>();
+// Files the extension just transferred: written by a download (downloadOnOpen,
+// sync remote ➞ local...) or already uploaded (uploadOnSave, commands...).
+// The watcher still sees those as local changes; uploading again would only
+// send the same content, so skip while the file is unchanged since then.
+const synced = new Map<string, string>();
 
-export function markDownloaded(fsPath: string) {
+export function markSynced(fsPath: string) {
   const signature = fileSignature(fsPath);
   if (signature) {
-    downloaded.set(fsPath, signature);
+    synced.set(fsPath, signature);
   }
 }
 
-function isUnchangedSinceDownload(fsPath: string): boolean {
-  const signature = downloaded.get(fsPath);
+function isUnchangedSinceSync(fsPath: string): boolean {
+  const signature = synced.get(fsPath);
   if (signature === undefined) {
     return false;
   }
   if (signature === fileSignature(fsPath)) {
     return true;
   }
-  // edited locally after the download: upload normally from now on
-  downloaded.delete(fsPath);
+  // edited locally since: upload normally
+  synced.delete(fsPath);
   return false;
 }
 
@@ -81,18 +82,16 @@ function doUpload() {
   const files = Array.from(uploadQueue.values()).sort((a, b) => fileDepth(b.fsPath) - fileDepth(a.fsPath));
   uploadQueue.clear();
 
-  const currentDownloadTasks = getRunningTransformTasks().filter(
-    task => task.transferType === TransferDirection.REMOTE_TO_LOCAL
-  );
+  const runningTasks = getRunningTransformTasks();
 
   files.forEach(async uri => {
-    // current target is still in downloading, so don't upload it.
-    if (currentDownloadTasks.find(task => task.localFsPath === uri.fsPath)) {
+    // target is still being downloaded/uploaded: don't upload it again.
+    if (runningTasks.find(task => task.localFsPath === uri.fsPath)) {
       return;
     }
 
     const fspath = uri.fsPath;
-    if (isUnchangedSinceDownload(fspath) || isDuplicateUpload(fspath)) {
+    if (isUnchangedSinceSync(fspath) || isDuplicateUpload(fspath)) {
       return;
     }
     logger.info(`[watcher/updated] ${fspath}`);
@@ -123,7 +122,8 @@ function doDelete() {
   });
 }
 
-const debouncedUpload = debounce(doUpload, ACTION_INTEVAL, { leading: true, trailing: true });
+// trailing only: gives a concurrent download/uploadOnSave time to register its task
+const debouncedUpload = debounce(doUpload, ACTION_INTEVAL, { leading: false, trailing: true });
 const debouncedDelete = debounce(doDelete, ACTION_INTEVAL, { leading: true, trailing: true });
 
 function uploadHandler(uri: vscode.Uri) {
