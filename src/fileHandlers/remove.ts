@@ -9,7 +9,18 @@ export const removeRemote = createFileHandler<FileHandleOption & { skipDir?: boo
   async handle(option) {
     const remoteFs = await this.fileService.getRemoteFileSystem(this.config);
     const { remoteFsPath } = this.target;
-    const stat = await remoteFs.lstat(remoteFsPath);
+    let stat;
+    try {
+      stat = await remoteFs.lstat(remoteFsPath);
+    } catch (error) {
+      // already gone remotely (e.g. a local delete made by "sync remote ➞ local"):
+      // nothing to remove. SFTP reports code 2 (NO_SUCH_FILE).
+      if (error.code === 2 || error.code === 'ENOENT') {
+        logger.info(`skip remove, not on remote: ${remoteFsPath}`);
+        return;
+      }
+      throw error;
+    }
     let promise;
     switch (stat.type) {
       case FileType.Directory:
