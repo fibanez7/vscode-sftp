@@ -6,6 +6,8 @@ _Maintenance release: bug fixes plus one small opt-in option. No changes needed 
 * **Quieter watcher deletes**: when a local file is deleted and it no longer exists on the remote (e.g. removed by "Sync Remote ➞ Local" with `syncOption.delete`), the remote delete is skipped and logged as info instead of a `No such file` error. Same for `downloadOnOpen` on a new local file that is not on the remote yet.
 * **Fix duplicated watcher actions**: the OS file watcher (notably on Windows) often reports the same change twice; the same upload/delete was then run twice. Repeats on an unchanged file within 3s are now skipped.
 * **Fix `Can't find config for remote resource` uncaught errors** after uploads/deletes when the Remote Explorer view was not loaded.
+* **Fix download ➞ re-upload echo** with `downloadOnOpen` + `watcher.autoUpload`: a file written by a download was seen as a local change and uploaded straight back. It is now skipped until you actually edit it.
+* **Fix whole-folder upload on rename** with `watcher.autoUpload`: Windows reports the parent folder as changed when a file inside is renamed/created, and the extension re-uploaded every file in that folder. Folder change events are now ignored (the files get their own events).
 * Skipped actions are logged with a `[skip]` tag.
 * Dependencies: `async` 3.2.6 (ReDoS fix), `ignore` 5.3.2.
 * The project is now in **maintenance mode**: critical fixes only.

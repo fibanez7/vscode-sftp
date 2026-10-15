@@ -3,9 +3,9 @@ import * as path from 'path';
 import app from '../../app';
 import logger from '../../logger';
 import { simplifyPath, reportError } from '../../helper';
-import { UResource, FileService, TransferTask } from '../../core';
+import { UResource, FileService, TransferTask, TransferDirection } from '../../core';
 import { validateConfig } from '../config';
-import watcherService from '../fileWatcher';
+import watcherService, { markDownloaded } from '../fileWatcher';
 import Trie from './trie';
 
 const WIN_DRIVE_REGEX = /^([a-zA-Z]):/;
@@ -123,6 +123,9 @@ export function createFileService(config: any, workspace: string) {
       // }
       app.sftpBarItem.showMsg(`failed ${filename}`, filepath, 2000 * 2);
     } else {
+      if (transferType === TransferDirection.REMOTE_TO_LOCAL) {
+        markDownloaded(localFsPath);
+      }
       logger.info(`${transferType} ${localFsPath}`);
       app.sftpBarItem.showMsg(`done ${filename}`, filepath, 2000 * 2);
     }

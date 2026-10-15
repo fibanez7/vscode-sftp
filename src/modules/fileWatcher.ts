@@ -45,6 +45,31 @@ function isDuplicateUpload(fsPath: string): boolean {
   return !!last && signature !== '' && last.signature === signature && now - last.at < DUPLICATE_WINDOW;
 }
 
+// Files just written by a download (downloadOnOpen, sync remote ➞ local...).
+// The watcher sees that write as a local change; re-uploading it would only
+// echo the same content back, so skip while the file is still as downloaded.
+const downloaded = new Map<string, string>();
+
+export function markDownloaded(fsPath: string) {
+  const signature = fileSignature(fsPath);
+  if (signature) {
+    downloaded.set(fsPath, signature);
+  }
+}
+
+function isUnchangedSinceDownload(fsPath: string): boolean {
+  const signature = downloaded.get(fsPath);
+  if (signature === undefined) {
+    return false;
+  }
+  if (signature === fileSignature(fsPath)) {
+    return true;
+  }
+  // edited locally after the download: upload normally from now on
+  downloaded.delete(fsPath);
+  return false;
+}
+
 function isDuplicateDelete(fsPath: string): boolean {
   const last = recentDeletes.get(fsPath);
   const now = Date.now();
@@ -67,7 +92,7 @@ function doUpload() {
     }
 
     const fspath = uri.fsPath;
-    if (isDuplicateUpload(fspath)) {
+    if (isUnchangedSinceDownload(fspath) || isDuplicateUpload(fspath)) {
       return;
     }
     logger.info(`[watcher/updated] ${fspath}`);
@@ -110,6 +135,21 @@ function uploadHandler(uri: vscode.Uri) {
   debouncedUpload();
 }
 
+function changeHandler(uri: vscode.Uri) {
+  // Windows reports a folder as "changed" whenever an entry inside it is
+  // created/renamed/deleted. That must not re-upload the whole folder: the
+  // entries themselves get their own create/change events.
+  try {
+    if (fs.statSync(uri.fsPath).isDirectory()) {
+      return;
+    }
+  } catch {
+    return;
+  }
+
+  uploadHandler(uri);
+}
+
 function addWatcher(id, watcher) {
   watchers[id] = watcher;
 }
@@ -148,7 +188,7 @@ function createWatcher(
 
   if (watcherConfig.autoUpload) {
     watcher.onDidCreate(uploadHandler);
-    watcher.onDidChange(uploadHandler);
+    watcher.onDidChange(changeHandler);
   }
 
   if (watcherConfig.autoDelete) {
