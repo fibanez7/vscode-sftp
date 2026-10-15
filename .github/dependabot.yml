@@ -4,15 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
-    # Group updates so we get a few PRs, not one per package.
-    groups:
-      dev-dependencies:
-        dependency-type: "development"
-      production-dependencies:
-        dependency-type: "production"
-    ignore:
-      # Major upgrades need manual migration (project pins the TypeScript 3.9 toolchain;
-      # several deps have ESM-only / breaking majors). Bump these by hand when ready.
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+    # Maintenance mode: no routine version-update PRs (the TypeScript 3.9 toolchain
+    # and engines.vscode ^1.64.2 are pinned on purpose; most bumps break the build).
+    # Dependabot security updates are not affected by this limit and still open PRs
+    # for real vulnerabilities.
+    open-pull-requests-limit: 0
