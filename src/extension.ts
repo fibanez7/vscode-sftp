@@ -7,6 +7,8 @@ import initCommands from './initCommands';
 import { reportError } from './helper';
 import fileActivityMonitor from './modules/fileActivityMonitor';
 import { tryLoadConfigs } from './modules/config';
+import { initSecretStorage } from './modules/secret';
+import { initSyncState } from './modules/syncState';
 import { getAllFileService, createFileService, disposeFileService } from './modules/serviceManager';
 import { getWorkspaceFolders, setContextValue } from './host';
 import RemoteExplorer from './modules/remoteExplorer';
@@ -28,6 +30,8 @@ function setup(workspaceFolders: vscode.WorkspaceFolder[]) {
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
+  initSecretStorage(context);
+  initSyncState(context);
   try {
     initCommands(context);
   } catch (error) {

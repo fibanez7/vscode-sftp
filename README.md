@@ -20,6 +20,8 @@ This is a separate listing with its own name, icon, repository and maintainer. I
 | Maintenance | stalled (last release behind) | actively maintained |
 | Icon & branding | blue file glyph | own green **⇅** icon |
 | Repository | `Natizyskunk/vscode-sftp` | `fibanez7/vscode-sftp` |
+| Credentials | plaintext in `sftp.json` | **OS keychain** (Secret Storage) + plaintext still supported |
+| Overwrite safety | none | optional **remote backups** + **remote-change conflict warning** before overwrite |
 | Your `sftp.json` | — | drop-in, **no config changes** |
 
 If the original still works for you, great — keep using it. This fork is for everyone it left stranded on a crash.
@@ -61,6 +63,7 @@ It's a **drop-in replacement** — your existing `.vscode/sftp.json` keeps worki
 - [Multiple contexts](#multiple-contexts)
 - [Connection hopping (jump host)](#connection-hopping-jump-host)
 - [Config from User Settings (remote-fs)](#config-from-user-settings-remote-fs)
+- [Secure credentials & backups](#secure-credentials--backups)
 - [VS Code settings](#vs-code-settings)
 - [Remote Explorer](#remote-explorer)
 - [Debugging](#debugging)
@@ -80,6 +83,9 @@ It's a **drop-in replacement** — your existing `.vscode/sftp.json` keeps worki
 - 👥 **Multiple profiles** (e.g. dev/prod) with one-click switching.
 - 🪝 **Connection hopping** through one or more jump hosts.
 - 🔑 Password, private key, SSH agent, and keyboard-interactive (2FA) auth.
+- 🔐 **Secure credential storage** — keep passwords/passphrases in the OS keychain instead of plaintext `sftp.json`.
+- 🛟 **Remote backups** — automatically back up a remote file before an upload overwrites it.
+- 🛡️ **Remote-change protection** — warn before an upload clobbers a remote file that changed since your last sync.
 - 🧩 **Multiple contexts** — map different local folders to different servers.
 - 📄 Atomic / temp-file uploads to avoid serving half-written files.
 
@@ -116,7 +122,7 @@ It's a **drop-in replacement** — your existing `.vscode/sftp.json` keeps worki
 4. Save it. To pull an existing project down first, run **`SFTP: Download Project`**.
 5. Edit locally — with `uploadOnSave: true`, every save syncs to the server.
 
-> Tip: leave `password` out and you'll be prompted securely instead of storing it in plain text. For keys, use `privateKeyPath` (see below).
+> Tip: don't want a plaintext password? Leave `password` out and run **`SFTP: Set Password / Passphrase (Secure)`** to store it in the OS keychain — see [Secure credentials & backups](#secure-credentials--backups). For keys, use `privateKeyPath` (see below).
 
 ---
 
@@ -165,6 +171,7 @@ Open the Command Palette (`Ctrl/Cmd + Shift + P`) and type `SFTP`, or right-clic
 | `SFTP: Create Folder` / `Create File` | Create on the server. |
 | `SFTP: Delete` | Delete a remote file/folder. |
 | `SFTP: Open SSH in Terminal` | Open an SSH session to the server. |
+| `SFTP: Set Password / Passphrase (Secure)` | Store credentials in the OS keychain (no plaintext). |
 | `SFTP: Set Profile` | Switch the active profile. |
 | `SFTP: Config` | Create/open `sftp.json`. |
 
@@ -216,6 +223,9 @@ All settings live in `.vscode/sftp.json`. Below is every available option.
 | `downloadOnOpen` | `"confirm"` \| boolean | `"confirm"` | Download a file when opened. `"confirm"` asks first. |
 | `useTempFile` | boolean | `false` | Upload to a temp file first, so visitors never hit a half-written file. |
 | `openSsh` | boolean | `false` | Atomic uploads (OpenSSH servers only). Requires `useTempFile: true`. |
+| `backup` | boolean | `false` | Back up the remote file before an upload overwrites it. See [Secure credentials & backups](#secure-credentials--backups). |
+| `backupLimit` | number | `10` | Max backups kept per file (oldest pruned). `0` = unlimited. Only used when `backup` is true. |
+| `checkRemoteChanges` | boolean | `false` | Warn before a single-file upload overwrites a remote file that changed since your last sync. See [Secure credentials & backups](#secure-credentials--backups). |
 
 ### Sync behavior
 
@@ -351,6 +361,59 @@ User Settings:
   "uploadOnSave": false
 }
 ```
+
+---
+
+## Secure credentials & backups
+
+### Store credentials in the OS keychain
+
+Instead of writing `password` (or `passphrase`) in plaintext inside `sftp.json`, you can store them in the operating-system keychain — **Keychain** on macOS, **Credential Manager** on Windows, **libsecret** on Linux — via VS Code's Secret Storage.
+
+1. Run **`SFTP: Set Password / Passphrase (Secure)`** from the Command Palette.
+2. Pick the connection, choose *password* or *passphrase*, and enter the secret.
+3. Remove the plaintext `password` / `passphrase` from `sftp.json`.
+
+On connect, credentials are resolved in this order: **`sftp.json` value → OS keychain → interactive prompt.** Existing configs with an inline `password` keep working unchanged. Run the command again and choose *Clear stored credentials* to remove a stored secret.
+
+> The key is bound to the connection identity (`protocol`, `username`, `host`, `port`). If you change any of those, store the credential again.
+
+### Remote backups before overwrite
+
+Set `"backup": true` to make every upload back up the existing remote file **before** it is overwritten:
+
+```jsonc
+{
+  "host": "host", "username": "user",
+  "remotePath": "/var/www/project",
+  "uploadOnSave": true,
+  "backup": true
+}
+```
+
+The previous version is moved into a `.sftp-backups` directory next to the file, with a timestamped name (e.g. `index.php.2026-06-16T10-20-30-000Z.bak`). Each upload adds a new timestamped copy, so you keep a version history. Use `backupLimit` to cap how many copies are kept per file (oldest are pruned; default `10`, `0` = unlimited). Backups are best-effort: if one can't be written, the failure is logged to the SFTP output channel and the upload still proceeds.
+
+> Add `".sftp-backups"` to `ignore` (or `remoteExplorer.filesExclude`) if you don't want to see or sync the backup folder.
+
+### Remote-change protection (don't clobber others' edits)
+
+Set `"checkRemoteChanges": true` so a **single-file upload** (including upload-on-save) first checks whether the remote file changed since you last synced it — comparing `mtime` + `size`, no slow content hashing:
+
+```jsonc
+{
+  "host": "host", "username": "user",
+  "remotePath": "/var/www/project",
+  "uploadOnSave": true,
+  "checkRemoteChanges": true
+}
+```
+
+- **Unchanged since your last sync** → uploads normally.
+- **Changed on the server** (a teammate pushed, or you edited it elsewhere) → you get a warning with **Overwrite** / **Cancel** before anything is overwritten.
+
+The baseline is updated whenever you download or upload that file, and is stored per workspace. **Bulk** `Upload Folder` / `Upload Project` are intentionally **not** checked, so large transfers stay fast. Pair it with `backup: true` for a recoverable safety net.
+
+> This is a lightweight guard, not full three-way merge. When in doubt, run **`SFTP: Diff with Remote`** and keep your work under version control.
 
 ---
 

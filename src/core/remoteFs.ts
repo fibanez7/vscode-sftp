@@ -1,5 +1,6 @@
 import upath from './upath';
 import { promptForPassword } from '../host';
+import { getStoredCredential } from '../modules/secret';
 import logger from '../logger';
 import app from '../app';
 import { ConnectOption } from './remote-client/remoteClient';
@@ -69,6 +70,30 @@ class KeepAliveRemoteFs {
       FsConstructor = FTPFileSystem;
     } else {
       throw new Error(`unsupported protocol ${option.protocol}`);
+    }
+
+    // Resolve credentials from the OS keychain (VSCode SecretStorage) when they
+    // are not provided in sftp.json. Keeps plaintext out of the config file
+    // while staying fully backward compatible with existing configs.
+    const hasInlineAuth =
+      connectOption.password !== undefined ||
+      connectOption.privateKey !== undefined ||
+      connectOption.privateKeyPath !== undefined ||
+      connectOption.agent !== undefined;
+    if (!hasInlineAuth) {
+      const stored = await getStoredCredential(connectOption, 'password');
+      if (stored !== undefined) {
+        connectOption.password = stored;
+      }
+    }
+    if (connectOption.passphrase === true) {
+      const storedPassphrase = await getStoredCredential(
+        connectOption,
+        'passphrase'
+      );
+      if (storedPassphrase !== undefined) {
+        connectOption.passphrase = storedPassphrase;
+      }
     }
 
     this.fs = new FsConstructor(upath, {

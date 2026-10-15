@@ -65,6 +65,21 @@
         "description": "True to enable atomic file uploads (only supported by openSSH servers). if true, `useTempFile` must also be set to true.",
         "default": false
       },
+      "backup": {
+        "type": "boolean",
+        "description": "True to back up the remote file before it is overwritten by an upload. Backups are stored next to the file in a `.sftp-backups` directory with a timestamped name.",
+        "default": false
+      },
+      "backupLimit": {
+        "type": "number",
+        "description": "Maximum number of backups to keep per file (oldest are pruned). 0 = unlimited. Only used when `backup` is true.",
+        "default": 10
+      },
+      "checkRemoteChanges": {
+        "type": "boolean",
+        "description": "Before a single-file upload (incl. upload-on-save), check whether the remote file changed since your last sync (compares mtime+size). If it did, warn before overwriting. Bulk folder/project uploads are not checked.",
+        "default": false
+      },
       "downloadOnOpen": {
         "enum": ["confirm", true, false],
         "description": "True to download when a file opens.",

@@ -26,6 +26,8 @@ export interface TransferOption {
   perserveTargetMode: boolean;
   useTempFile?: boolean;
   openSsh?: boolean;
+  backup?: boolean;
+  backupLimit?: number;
 }
 
 export default class TransferTask implements Task {
@@ -124,13 +126,20 @@ export default class TransferTask implements Task {
       fallbackMode,
       atime,
       mtime,
-      filePerm
+      filePerm,
+      backup
     } = this._TransferOption;
     // Set the mode if it's specified in the config, otherwise get mode from server.
     let mode = filePerm ? parseInt(String(filePerm), 8) : this._TransferOption.mode;
     let targetFd; // Destination file
     let uploadFd; // Temp file or destination file when no temp file is used
     const uploadTarget = target + (useTempFile ? ".new" : "");
+
+    // Back up the target before it gets overwritten. Done before any open/write
+    // so the previous content is always preserved, even with a non-temp upload.
+    if (backup) {
+      await this._backupTarget(targetFs, target);
+    }
 
     // Use mode first.
     // Then check perserveTargetMode and fallback to fallbackMode if fail to get mode of target
@@ -212,6 +221,70 @@ export default class TransferTask implements Task {
 
     } finally {
       await targetFs.close(uploadFd);
+    }
+  }
+
+  // Move the existing target into a sibling `.sftp-backups` directory with a
+  // timestamped name. Best-effort: a failed backup is logged but does not abort
+  // the upload (the warning is surfaced to the user via the output channel).
+  private async _backupTarget(targetFs: FileSystem, target: string): Promise<void> {
+    let exists = true;
+    try {
+      await targetFs.lstat(target);
+    } catch (error) {
+      exists = false;
+    }
+    if (!exists) {
+      return;
+    }
+
+    const dirname = targetFs.pathResolver.dirname(target);
+    const basename = targetFs.pathResolver.basename(target);
+    const backupDir = targetFs.pathResolver.join(dirname, '.sftp-backups');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const backupPath = targetFs.pathResolver.join(
+      backupDir,
+      `${basename}.${timestamp}.bak`
+    );
+
+    try {
+      await targetFs.ensureDir(backupDir);
+      await targetFs.rename(target, backupPath);
+      logger.info(`backup: ${target} -> ${backupPath}`);
+      await this._pruneBackups(targetFs, backupDir, basename);
+    } catch (error) {
+      logger.warn(`backup failed for ${target}: ${error.message}`);
+    }
+  }
+
+  // Keep only the most recent `backupLimit` backups for this file. Backup names
+  // end in an ISO timestamp, so a lexicographic sort is chronological.
+  private async _pruneBackups(
+    targetFs: FileSystem,
+    backupDir: string,
+    basename: string
+  ): Promise<void> {
+    const limit = this._TransferOption.backupLimit;
+    if (!limit || limit <= 0) {
+      return;
+    }
+
+    const prefix = `${basename}.`;
+    const entries = await targetFs.list(backupDir);
+    const mine = entries
+      .map(entry => entry.name)
+      .filter(name => name.startsWith(prefix) && name.endsWith('.bak'))
+      .sort();
+
+    const excess = mine.length - limit;
+    for (let i = 0; i < excess; i++) {
+      const stale = targetFs.pathResolver.join(backupDir, mine[i]);
+      try {
+        await targetFs.unlink(stale);
+        logger.info(`backup pruned: ${stale}`);
+      } catch (error) {
+        logger.warn(`backup prune failed for ${stale}: ${error.message}`);
+      }
     }
   }
 }

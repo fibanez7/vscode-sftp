@@ -1,8 +1,8 @@
 {
-  "name": "sftp-sync-maintained",
+  "name": "sftp-sync-plus",
   "displayName": "SFTP Sync Plus",
   "description": "Maintained, up-to-date fork for SFTP/FTP sync. Works on VS Code 1.123+/Node 24 (fixes the isDate crash). Independent fork — not the original 'SFTP' extension.",
-  "version": "1.18.1",
+  "version": "1.19.0",
   "publisher": "fibanez",
   "author": "fibanez (https://github.com/fibanez7)",
   "contributors": [
@@ -90,6 +90,11 @@
       {
         "command": "sftp.openConnectInTerminal",
         "title": "Open SSH in Terminal",
+        "category": "SFTP"
+      },
+      {
+        "command": "sftp.setPassword",
+        "title": "Set Password / Passphrase (Secure)",
         "category": "SFTP"
       },
       {
@@ -305,6 +310,10 @@
         },
         {
           "command": "sftp.openConnectInTerminal",
+          "when": "sftp.enabled"
+        },
+        {
+          "command": "sftp.setPassword",
           "when": "sftp.enabled"
         },
         {

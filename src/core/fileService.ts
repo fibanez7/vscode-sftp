@@ -39,6 +39,9 @@ interface ServiceOption {
   uploadOnSave: boolean;
   useTempFile: boolean;
   openSsh: boolean;
+  backup: boolean;
+  backupLimit: number;
+  checkRemoteChanges: boolean;
   downloadOnOpen: boolean | 'confirm';
   filePerm?: number;
   dirPerm?: number;
@@ -151,6 +154,9 @@ function getHostInfo(config) {
     'uploadOnSave',
     'useTempFile',
     'openSsh',
+    'backup',
+    'backupLimit',
+    'checkRemoteChanges',
     'downloadOnOpen',
     'ignore',
     'ignoreFile',

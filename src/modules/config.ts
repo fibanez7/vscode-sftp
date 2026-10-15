@@ -40,6 +40,9 @@ const configScheme = {
   uploadOnSave: Joi.boolean(),
   useTempFile: Joi.boolean(),
   openSsh: Joi.boolean(),
+  backup: Joi.boolean(),
+  backupLimit: Joi.number().integer(),
+  checkRemoteChanges: Joi.boolean(),
   downloadOnOpen: Joi.boolean().allow('confirm'),
 
   ignore: Joi.array()
@@ -76,6 +79,9 @@ const defaultConfig = {
   uploadOnSave: false,
   useTempFile: false,
   openSsh: false,
+  backup: false,
+  backupLimit: 10,
+  checkRemoteChanges: false,
   downloadOnOpen: false,
   ignore: [],
   // ignoreFile: undefined,
