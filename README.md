@@ -6,6 +6,8 @@
 
 Sync files between a local folder and a remote server over **SFTP/SSH** or **FTP/FTPS**: upload on save, download, two-way sync, a remote file explorer, multiple profiles and more.
 
+> **Status: maintenance mode.** The extension is stable and feature-complete: it does what the classic SFTP extension did, fixed for modern VS Code. Only critical bug fixes (crashes, compatibility with new VS Code/Node versions) are planned — no new features.
+
 Maintained by [@fibanez7](https://github.com/fibanez7). Fork lineage: [liximomo](https://github.com/liximomo/vscode-sftp) → [Natizyskunk](https://github.com/Natizyskunk/vscode-sftp) → this fork. MIT licensed — thanks to both for the original work.
 
 ---
@@ -17,7 +19,7 @@ This is a separate listing with its own name, icon, repository and maintainer. I
 | | Original `SFTP` (Natizyskunk / liximomo) | **SFTP Sync Plus** (this fork) |
 |---|---|---|
 | VS Code 1.123+ / Node 24 | ❌ crashes (`isDate is not a function`) | ✅ fixed |
-| Maintenance | stalled (last release behind) | actively maintained |
+| Maintenance | stalled (last release behind) | maintained (critical fixes) |
 | Icon & branding | blue file glyph | own green **⇅** icon |
 | Repository | `Natizyskunk/vscode-sftp` | `fibanez7/vscode-sftp` |
 | Your `sftp.json` | — | drop-in, **no config changes** |
@@ -89,7 +91,7 @@ It's a **drop-in replacement** — your existing `.vscode/sftp.json` keeps worki
 
 1. Open **Extensions** (`Ctrl/Cmd + Shift + X`).
 2. **Uninstall** any other SFTP extension to avoid duplicate commands.
-3. Install **SFTP Sync Plus** from the Marketplace, or grab the `.vsix` from [Releases](https://github.com/fibanez7/vscode-sftp/releases) and use **··· → Install from VSIX…**.
+3. Download the latest `.vsix` from [Releases](https://github.com/fibanez7/vscode-sftp/releases) and use **··· → Install from VSIX…** (the Marketplace listing is currently unavailable).
 4. Reload VS Code.
 
 ---
@@ -233,6 +235,8 @@ Configure the `Sync` commands via `syncOption`:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `ignore` | string[] | `[".vscode", ".git", ".DS_Store"]` | Glob patterns to skip (gitignore syntax). |
+| `uploadIgnore` | string[] | — | Extra patterns skipped **only when uploading** (local ➞ remote), on top of `ignore`. |
+| `downloadIgnore` | string[] | — | Extra patterns skipped **only when downloading** (remote ➞ local), on top of `ignore`. |
 | `ignoreFile` | string | `.gitignore` | Path to an ignore file (absolute or relative to workspace). |
 
 ### Remote Explorer options

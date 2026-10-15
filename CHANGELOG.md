@@ -1,3 +1,10 @@
+## 1.18.2 - 2026-10-15
+_Maintenance release: bug fixes plus one small opt-in option. No changes needed in your `.vscode/sftp.json`._
+* **Fix Pageant (`"agent": "pageant"`) on Windows** — `Failed to retrieve identities from agent` ([#10](https://github.com/fibanez7/vscode-sftp/issues/10)). Since 1.17.0 `ssh2` is bundled, and its helper `pagent.exe` was left out of the package. It is now shipped with the extension.
+* **Fix `uploadOnSave` on network shares** (`\\server\share\...`) — `Config Not Found` when VS Code reported the server/share name with different letter case ([#8](https://github.com/fibanez7/vscode-sftp/issues/8), upstream Natizyskunk#589). UNC server and share names are now compared case-insensitively on Windows.
+* **New options `uploadIgnore` / `downloadIgnore`** ([#15](https://github.com/fibanez7/vscode-sftp/issues/15)): extra gitignore-style patterns applied only in one direction, on top of `ignore`. Example: `"downloadIgnore": ["node_modules"]` uploads it but never downloads it back.
+* The project is now in **maintenance mode**: critical fixes only.
+
 ## 1.18.1 - 2026-06-10
 _Fix de crash del watcher al borrar archivos/carpetas. Sin cambios en tu `.vscode/sftp.json`._
 * **Fix crash en `watcher/removed`** (`Error: ENOENT ... realpath`): al borrar localmente un archivo o carpeta (o ficheros transitorios como `.git/index.lock`), `getFileSystemPath` hacía `fs.realpathSync` sobre una ruta que ya no existía y reventaba el handler del watcher. Ahora, si la ruta no existe, se usa la ruta original (el `realpath` solo normalizaba mayúsculas de la letra de unidad en Windows/macOS). No relacionado con `ssh2`.

@@ -42,6 +42,21 @@ const config = {
     // Ignore them so the bundle uses the JS fallback on every platform.
     new webpack.IgnorePlugin({ resourceRegExp: /^cpu-features$/ }),
     new webpack.IgnorePlugin({ resourceRegExp: /\.node$/ }),
+    // ssh2's Pageant agent spawns `<__dirname>/../util/pagent.exe`. Once bundled,
+    // __dirname is `dist/`, so ship the helper at `<extension root>/util/`.
+    {
+      apply(compiler) {
+        compiler.hooks.afterEmit.tap('CopyPagent', () => {
+          const fs = require('fs');
+          const dest = path.resolve(__dirname, 'util');
+          fs.mkdirSync(dest, { recursive: true });
+          fs.copyFileSync(
+            require.resolve('ssh2/util/pagent.exe'),
+            path.join(dest, 'pagent.exe')
+          );
+        });
+      },
+    },
   ],
 };
 

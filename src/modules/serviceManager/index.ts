@@ -49,6 +49,10 @@ function normalizePathForTrie(pathname) {
     if (device.charAt(1) === ':') {
       // lowercase drive letter
       pathname = pathname[0].toLowerCase() + pathname.substr(1);
+    } else {
+      // lowercase UNC server and share (\\Server\Share\...): case-insensitive on
+      // Windows, and VS Code may report them with a different case on save.
+      pathname = pathname.replace(/^([\\/]{2}[^\\/]+[\\/][^\\/]+)/, m => m.toLowerCase());
     }
   }
 

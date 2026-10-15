@@ -49,6 +49,8 @@ interface ServiceOption {
     update: boolean;
   };
   ignore: string[];
+  uploadIgnore?: string[];
+  downloadIgnore?: string[];
   ignoreFile: string;
   remoteExplorer: {
     filesExclude?: string[];
@@ -96,10 +98,13 @@ export interface FileServiceConfig
 export interface ServiceConfig
   extends Root,
     Host,
-    Omit<ServiceOption, 'ignore'>,
+    Omit<ServiceOption, 'ignore' | 'uploadIgnore' | 'downloadIgnore'>,
     SftpOption,
     FtpOption {
   ignore?: ((fsPath: string) => boolean) | null;
+  // `ignore` plus the direction-specific patterns
+  uploadIgnore?: ((fsPath: string) => boolean) | null;
+  downloadIgnore?: ((fsPath: string) => boolean) | null;
 }
 
 export interface WatcherService {
@@ -153,6 +158,8 @@ function getHostInfo(config) {
     'openSsh',
     'downloadOnOpen',
     'ignore',
+    'uploadIgnore',
+    'downloadIgnore',
     'ignoreFile',
     'watcher',
     'concurrency',
@@ -350,8 +357,8 @@ function mergeProfile(
 
   const keys = Object.keys(source);
   for (const key of keys) {
-    if (key === 'ignore') {
-      res.ignore = res.ignore.concat(source.ignore);
+    if (key === 'ignore' || key === 'uploadIgnore' || key === 'downloadIgnore') {
+      res[key] = (res[key] || []).concat(source[key] || []);
     } else {
       res[key] = source[key];
     }
@@ -572,7 +579,16 @@ export default class FileService {
     if (serviceConfig.protocol === 'ftp') {
       serviceConfig.concurrency = 1;
     }
-    serviceConfig.ignore = this._createIgnoreFn(fileServiceConfig);
+    const ignored = filesIgnoredFromConfig(fileServiceConfig);
+    serviceConfig.ignore = this._createIgnoreFn(fileServiceConfig, ignored);
+    serviceConfig.uploadIgnore = this._createIgnoreFn(
+      fileServiceConfig,
+      ignored.concat(fileServiceConfig.uploadIgnore || [])
+    );
+    serviceConfig.downloadIgnore = this._createIgnoreFn(
+      fileServiceConfig,
+      ignored.concat(fileServiceConfig.downloadIgnore || [])
+    );
 
     return serviceConfig;
   }
@@ -588,11 +604,13 @@ export default class FileService {
     }
   }
 
-  private _createIgnoreFn(config: FileServiceConfig): ServiceConfig['ignore'] {
+  private _createIgnoreFn(
+    config: FileServiceConfig,
+    ignoreConfig: string[]
+  ): ServiceConfig['ignore'] {
     const localContext = this.baseDir;
     const remoteContext = config.remotePath;
 
-    const ignoreConfig = filesIgnoredFromConfig(config);
     if (ignoreConfig.length <= 0) {
       return null;
     }

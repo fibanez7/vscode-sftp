@@ -45,6 +45,12 @@ const configScheme = {
   ignore: Joi.array()
     .min(0)
     .items(Joi.string()),
+  uploadIgnore: Joi.array()
+    .min(0)
+    .items(Joi.string()),
+  downloadIgnore: Joi.array()
+    .min(0)
+    .items(Joi.string()),
   ignoreFile: Joi.string(),
   watcher: {
     files: Joi.string().allow(false, null),

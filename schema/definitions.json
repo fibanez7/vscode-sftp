@@ -105,6 +105,22 @@
         },
         "default": [".vscode", ".git", ".DS_Store"]
       },
+      "uploadIgnore": {
+        "type": "array",
+        "description": "Extra files to ignore only when uploading (local ➞ remote), on top of `ignore`. Same behavior as gitignore.",
+        "items": {
+          "type": "string",
+          "description": "Ignore pattern."
+        }
+      },
+      "downloadIgnore": {
+        "type": "array",
+        "description": "Extra files to ignore only when downloading (remote ➞ local), on top of `ignore`. Same behavior as gitignore.",
+        "items": {
+          "type": "string",
+          "description": "Ignore pattern."
+        }
+      },
       "ignoreFile": {
         "type": "string",
         "description": "Absolute path to the ignore file or Relative path relative to the workspace root folder.",

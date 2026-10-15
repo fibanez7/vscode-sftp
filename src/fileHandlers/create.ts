@@ -34,7 +34,7 @@ export const createRemoteFile = createFileHandler<FileHandleOption & { skipDir?:
   transformOption() {
     const config = this.config;
     return {
-      ignore: config.ignore,
+      ignore: config.uploadIgnore,
     };
   },
   afterHandle() {
@@ -73,7 +73,7 @@ export const createRemoteFolder = createFileHandler<FileHandleOption & { skipDir
   transformOption() {
     const config = this.config;
     return {
-      ignore: config.ignore,
+      ignore: config.uploadIgnore,
     };
   },
   afterHandle() {

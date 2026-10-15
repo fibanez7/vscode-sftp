@@ -31,7 +31,7 @@ export const removeRemote = createFileHandler<FileHandleOption & { skipDir?: boo
   transformOption() {
     const config = this.config;
     return {
-      ignore: config.ignore,
+      ignore: config.uploadIgnore,
     };
   },
   afterHandle() {

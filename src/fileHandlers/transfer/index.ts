@@ -71,7 +71,7 @@ export const sync2Remote = createFileHandler<SyncOption>({
       useTempFile: config.useTempFile,
       openSsh: config.openSsh,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.uploadIgnore,
       delete: syncOption.delete,
       skipCreate: syncOption.skipCreate,
       ignoreExisting: syncOption.ignoreExisting,
@@ -109,7 +109,7 @@ export const sync2Local = createFileHandler<SyncOption>({
     return {
       perserveTargetMode: false,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.downloadIgnore,
       delete: syncOption.delete,
       skipCreate: syncOption.skipCreate,
       ignoreExisting: syncOption.ignoreExisting,
@@ -128,7 +128,7 @@ export const upload = createFileHandler<TransferOption>({
       useTempFile: config.useTempFile,
       openSsh: config.openSsh,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.uploadIgnore,
     };
   },
   afterHandle() {
@@ -146,7 +146,7 @@ export const uploadFile = createFileHandler<TransferOption>({
       useTempFile: config.useTempFile,
       openSsh: config.openSsh,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.uploadIgnore,
     };
   },
   afterHandle() {
@@ -164,7 +164,7 @@ export const uploadFolder = createFileHandler<TransferOption>({
       useTempFile: config.useTempFile,
       openSsh: config.openSsh,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.uploadIgnore,
     };
   },
   afterHandle() {
@@ -180,7 +180,7 @@ export const download = createFileHandler<TransferOption>({
     return {
       perserveTargetMode: false,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.downloadIgnore,
     };
   },
 });
@@ -193,7 +193,7 @@ export const downloadFile = createFileHandler<TransferOption>({
     return {
       perserveTargetMode: false,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.downloadIgnore,
     };
   },
 });
@@ -206,7 +206,7 @@ export const downloadFolder = createFileHandler<TransferOption>({
     return {
       perserveTargetMode: false,
       // remoteTimeOffsetInHours: config.remoteTimeOffsetInHours,
-      ignore: config.ignore,
+      ignore: config.downloadIgnore,
     };
   },
 });
